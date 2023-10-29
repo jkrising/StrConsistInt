@@ -1,0 +1,1 @@
+This repository contains the source code for the paper "Strongly Consistent Interval Estimates Based on Asymptotic Normality" available [here](http://dx.doi.org/10.13140/RG.2.2.27790.13124).  The text of this paper is released under the [CC-BY license](LICENSE.md) and the scripts are released under the [MIT license](R/LICENSE.md).

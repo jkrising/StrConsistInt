@@ -1,0 +1,251 @@
+\documentclass[12pt]{article}
+\usepackage{fullpage}
+\usepackage{amsmath, amsfonts, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{tikz}
+\usepackage[section]{algorithm}
+\usepackage{algpseudocode}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{cleveref}
+\usepackage[sort]{natbib}
+\usepackage{complexity}
+\usepackage{enumerate}
+\usepackage[title]{appendix}
+\usepackage{adjustbox}
+\usepackage{xurl}
+
+\newcommand{\ind}[1]{\mathbf{1}(#1)}
+
+\newcommand{\prob}[1]{\mathbb{P}(#1)}
+\newcommand{\varprob}[1]{\mathbb{P}\left(#1\right)}
+\newcommand{\Var}[1]{\operatorname{Var}(#1)}
+
+\input{./tex/dataCommands.tex}
+
+\newtheorem{theorem}{Theorem}
+\numberwithin{theorem}{section}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{question}[theorem]{Question}
+
+\title{Strongly Consistent Interval Estimates Based on Asymptotic Normality}
+\author{Justin Rising\thanks{Philadelphia, PA\\email: \texttt{jkrising@gmail.com}}}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+I exhibit a sequence of interval estimates $\hat{I}_n$ for an unknown population mean $\mu$ such that the length of $\hat{I}_n$ converges to zero in probability and $\prob{\mu \in \hat{I}_n}$ converges to one as n becomes large.  The analysis is based on an asymptotically tight upper bound for Gaussian quantiles that may be of independent interest.
+\end{abstract}
+
+\section{Introduction}
+\label{sec_intro}
+
+Every student who has taken an introductory class in statistics is familiar with the confidence intervals for the mean of an unknown population derived from the central limit theorem.  While these intervals have the correct asymptotic coverage probability, their coverage probability for a finite sample may be significantly lower~\citep{brown2001binomInt}.
+
+However, the assumptions of the central limit theorem are quite weak, and it seems reasonable to believe that under stronger conditions we can place some bound on the excess error probability of these intervals.  This was confirmed in~\cite{hall1995coverage}, where regularity conditions were given that bound the coverage probability by $1 - \alpha - O(n^{-1})$.
+
+In this paper, we will see that this bound is sufficient to construct a sequence of interval estimates with a property referred to in~\cite{rising2023orderPersp} as strong consistency.  This property requires that the length of the interval estimates converges to zero in probability and the coverage probability converges to one.  While there are many strong guarantees for the asymptotics of hypothesis tests (see~\cite{ermakov2017testing} and references therein), to the best of my knowledge there are no similar results for interval estimates.
+
+While this result may be interesting in and of itself, it also has a connection to the problem of estimating ranks.  In~\cite{rising2023orderPersp} it was shown that a particular integer-valued estimate of the ranking of not necessarily distinct unknown parameters is consistent as long as that estimate is constructed from a sequence of strongly consistent interval estimates.  By exhibiting such a sequence, we can give an unconditionally consistent ranking estimator.
+
+The key to the construction here is the observation that the bound on the excess error probability given in~\cite{hall1995coverage} goes to zero in the large sample limit at a rate that does not depend on $\alpha$.  Therefore we can replace the fixed $\alpha$ used in standard practice by a sequence $\alpha_n$ that decays to zero as long as it does so sufficiently slowly.
+
+This leaves us with the problem of determining what ``sufficiently slowly'' means, which seems at first glance to be an intractable problem.  The Gaussian quantile function is non-elementary and the only description of it that I am aware of other than its definition is the differential equation given in~\cite{steinbrecher2008quantileMech}.  However, we have elementary bounds on the inverse quantile function through the well-known Gaussian tail probability bounds~\citep{duembgen2010tailBounds}.  We will see that these imply bounds on the quantile function itself that can be used to determine which rates are sufficiently slow.
+
+The bounds that we will study involve the Lambert $W$ function, a special function with numerous applications in both pure and applied mathematics~\citep{brito2008lambertToday, corless1996lambertW, dence2013briefLook} as well as in probability and statistics (see~\cite{goerg2011lambertVars, jodra2009quantiles, pakes2011mixtures, stehlik2003exactTests} for the key early papers).  We will rely on standard results regarding this function to derive an asymptotically tight upper bound for the Gaussian quantile function as well as a looser but analytically tractable bound involving only elementary functions.
+
+The remainder of this paper is arranged as follows.  In section~\ref{sec_ineq}, we first give the necessary background on the Lambert $W$ function and then derive inequalities for Gaussian quantiles.  In section~\ref{sec_conf_int}, we apply these inequalities and the result of~\cite{hall1995coverage} to give a sequence of strongly consistent interval estimates for an unknown mean.  Finally, in section~\ref{sec_rank}, we revisit the results on rank estimation from~\cite{rising2023orderPersp} in light of what we have shown.
+
+\section{Inequalities for Gaussian Quantiles}
+\label{sec_ineq}
+
+Here we will develop a set of inequalities for the Gaussian quantile function.  We begin with an overview of the mathematical tools we will use.  We will then derive two upper bounds for the Gaussian quantile function: one involving the Lambert $W$ function, and another looser inequality involving only elementary functions.  We will then exhibit a family of lower bounds which can be used to show that the first upper bound is asymptotically tight.
+
+\subsection{Preliminaries}
+\label{sec_ineq_prelim}
+
+We will follow standard notation.  $\phi$ and $\Phi$ respectively denote the density and distribution function of the standard normal distribution, $\bar{\Phi}$ denotes its survival function, and $z_\alpha$ is shorthand for $\bar{\Phi}^{-1}(\alpha)$.
+
+We begin with a very brief introduction to the Lambert $W$ function.  This is a well-studied function but we will need only its definition and basic properties (see~\cite{roy2010functions} and references therein for further details).  The Lambert $W$ function is defined by $W\left(xe^x\right) = x$.  This is most naturally viewed as a complex function, so a full treatment requires studying all of its branches, but for our purposes it is sufficient to restrict our attention to its principal branch evaluated on the right half-line.  On this domain the principal branch, denoted $W_0$, is analytic, strictly increasing, and real-valued with $W_0(0) = 0$.
+
+The inverses of many functions may be described in terms of the Lambert $W$ function.  In particular, we will be interested in the class of functions described in Lemma~\ref{lem_lambert}.  The proof is purely computational and is left as an exercise for the reader.
+
+\begin{lemma}
+\label{lem_lambert}
+If $f_m^{-1}(x) = \phi(x) / x^m$ for $x > 0$ then $f_m(x) = \sqrt{mW_0\left(\left(\sqrt{2\pi} x\right)^{-2 / m} / m\right)}$.
+\end{lemma}
+
+Finally, we will state and prove a lemma that describes when the inverse of a lower bound for a function is itself a lower bound for the inverse of a function.  Although this result is generally well known, it is key to the remaining analysis and is worth studying explicitly.
+
+\begin{lemma}
+\label{lem_inversion}
+Let $f$ and $g$ be strictly decreasing real functions such that $f(x) < g(x)$ for all $x$ in some interval $I$.  For any $y$ such that $f^{-1}(y)$ and $g^{-1}(y)$ are both defined, we must have $f^{-1}(y) < g^{-1}(y)$.
+\end{lemma}
+\begin{proof}
+Note that $f$ and $g$ must be strictly monotonic to have inverses, and they may only have common values if they are both increasing or both decreasing.  Let $y$ be some value such that there are $x_f$, $x_g$ such that $f(x_f) = y$ and $g(x_g) = y$.  We must have $f(x) < y$ for all $x \geq x_g$, so it follows that $x_f < x_g$.
+\end{proof}
+
+Many inequalities regarding random variables are of the form $\prob{X > t} < f(t)$ for some strictly decreasing function $f$.  When the left hand side is also strictly decreasing, Lemma~\ref{lem_inversion} allows us to derive a corresponding quantile inequality.  In this paper we will only consider the normal distribution, but there may be interesting applications of Lemma~\ref{lem_inversion} to other distributions.
+
+\subsection{Upper Bounds for Gaussian Quantiles}
+\label{sec_ineq_upper}
+
+We will now use the tools developed above to give upper bounds for $z_\alpha$.  We begin by reviewing the standard Gaussian tail probability bounds given in~\cite{gordon1941millsRatio}:
+
+\begin{theorem}[\cite{gordon1941millsRatio}]
+\label{thm_tail_bounds}
+$\phi(x) / (x + 1 / x) < \bar{\Phi}(x) < \phi(x) / x$ for all $x > 0$.
+\end{theorem}
+
+The upper bound given in Theorem~\ref{thm_tail_bounds} is $f_1^{-1}(x)$ in our notation, so we can apply Lemmas~\ref{lem_lambert} and~\ref{lem_inversion} to immediately derive a quantile bound which we record as Theorem~\ref{thm_upper_bound_direct}.  Because this inequality follows directly from the tail probability bound, we will describe it as the direct upper bound.
+
+\begin{theorem}
+\label{thm_upper_bound_direct}
+$z_\alpha < f_1(\alpha)$ for all $\alpha \in (0, 1/2)$.
+\end{theorem}
+
+While the direct upper bound is generally valid, the Lambert $W$ function is not as analytically tractable as any elementary function.  It will be useful to have an upper bound involving only elementary functions, and so we will proceed to derive such a bound.  We begin with a standard upper bound on $W_0$:
+
+\begin{theorem}[\cite{hoorfar2008inequalities}]
+\label{thm_hoorfar}
+$W_0(x) \leq \log((x + y) / (1 + \log(y))$ whenever $x \geq 0$ and $y > 1 / e$.
+\end{theorem}
+
+\noindent
+The upper bound in Theorem~\ref{thm_hoorfar} can be simplified by taking $y = x$ and observing that $\log(y) \geq 0$ when $y \geq 1$.  We record this new inequality as Corollary~\ref{cor_hoorfar}.
+
+\begin{corollary}
+\label{cor_hoorfar}
+If $x \geq 1$ then $W_0(x) \leq \log(2x)$.
+\end{corollary}
+
+Theorem~\ref{thm_upper_bound_direct} and Corollary~\ref{cor_hoorfar} together imply a purely elementary upper bound on $z_\alpha$ for all sufficiently small $\alpha$.
+
+\begin{theorem}
+\label{thm_upper_bound_elem}
+$z_\alpha < \sqrt{-2\log(\sqrt{\pi}\alpha)}$ for all $\alpha \leq 1 / \sqrt{2\pi}$.
+\end{theorem}
+
+\subsection{Asymptotics of the Direct Upper Bound}
+\label{sec_ineq_asymp}
+
+We have made use of the upper bound given in Theorem~\ref{thm_tail_bounds}, but there is a lower bound as well, and we now pause to consider what we can infer from it.  In order to do so, we observe that $x + 1 / x$ is eventually smaller than $x^{1 + \epsilon}$ for any $\epsilon > 0$.  This gives us a family of lower bounds for $\bar{\Phi}(x)$ which are more tractable.
+
+\begin{lemma}
+\label{lem_lower_bound_tail}
+For every $\epsilon > 0$ there is some $x_\epsilon$ such that $\phi(x) / x^{1 + \epsilon} < \bar{\Phi}(x)$ for all $x \geq x_\epsilon$.
+\end{lemma}
+
+The function $x^{1 + \epsilon} - (x + 1 / x)$ is negative when $x = 1$, unbounded, and strictly increasing for $x > 1$.  Therefore it has a unique root in the interval $(1, \infty)$ which we have denoted as $x_\epsilon$.  Although there is no analytic expression for this root, it can be easily numerically approximated.
+
+The lower bound in Lemma~\ref{lem_lower_bound_tail} is $f_{1 + \epsilon}^{-1}$, so we can apply Lemmas~\ref{lem_lambert} and~\ref{lem_inversion} to derive a lower bound on $z_\alpha$ for all sufficiently small $\alpha$.  We record this result as Theorem~\ref{thm_lower_bound}.
+
+\begin{theorem}
+\label{thm_lower_bound}
+Let $\alpha_\epsilon = \bar{\Phi}(x_\epsilon)$.  Then $z_\alpha > f_{1 + \epsilon}(\alpha)$ for all $\alpha < \alpha_\epsilon$.
+\end{theorem}
+
+We have shown that $f_{1 + \epsilon}(\alpha) < z_\alpha < f_1(\alpha)$ for any $\epsilon > 0$ whenever $\alpha$ is sufficiently small.  This strongly suggests that $z_\alpha$ is asymptotically like $f_1(\alpha)$ in some sense, and we will now show that that is the case.
+
+For any $x > 0$, let $g_x(\epsilon) = f_{1 + \epsilon}(x)$.  $g_x(\epsilon)$ is analytic and therefore Lipschitz continuous on every bounded interval contained in the right half-line, and this is the key fact that we will use in the proof of Theorem~\ref{thm_tight_diff}.
+
+\begin{theorem}
+\label{thm_tight_diff}
+$\displaystyle\lim_{\alpha \rightarrow 0^+} f_1(\alpha) - z_\alpha = 0$.
+\end{theorem}
+\begin{proof}
+Fix $\epsilon > 0$ and let $\alpha_n$ be any sequence contained in $(0, 1/2)$ which converges to zero.  Let $N_\epsilon$ be the least $n$ such that $z_{\alpha_n} > \max(f_{1 + \epsilon}(\alpha_n), f_2(\alpha_n))$ for all $n \geq N_\epsilon$ and define $\epsilon_*$ to be $\inf\{\delta \mid z_{\alpha_{N_\epsilon}} > f_{1 + \delta}(\alpha_{N_\epsilon})\}$.  Then $f_1(\alpha_n) - z_{\alpha_n} < f_1(\alpha_n) - f_{1 + \epsilon_*}(\alpha_n)$ for all $n \geq N_\epsilon$.  The right-hand side of this inequality is $g_{\alpha_n}(0) - g_{\alpha_n}(\epsilon_*)$ and by construction we have $\epsilon_* \in [0, 1]$.  $g_{\alpha_n}$ is Lipschitz continuous on $[0, 1]$ so there is some constant $L$ such that $f_1(\alpha_n) - z_{\alpha_n} < L\epsilon_*$ for all $n \geq N_\epsilon$.  Since $\epsilon_* \leq \epsilon$, the result follows immediately.
+\end{proof}
+
+\noindent
+Theorem~\ref{thm_tight_diff} also allows us to conclude that $f_1(\alpha) / z_\alpha$ converges to one as $\alpha$ decreases to zero.
+
+\begin{figure}[t]
+\centering
+\input{./tex/figBounds.tex}
+\caption{The Gaussian quantile function and the direct upper bound plotted as functions of $1 / \alpha$}.
+\label{fig_bound}
+\end{figure}
+
+While we have the shown that the direct upper bound is asymptotically tight, this does not address its use as a numerical approximation of $z_a$.  Figure~\ref{fig_bound} shows $z_\alpha$ and $f_1(\alpha)$ plotted as functions of $1 / \alpha$, and it clearly shows that there is a large difference even when $\alpha = \maxAlpha$.  This difference is approximately $\maxAlphaDiff$, which suggests that the convergence in Theorem~\ref{thm_tight_diff} is too slow for $f_1(\alpha)$ to be treated as a reasonable numerical approximation of $z_\alpha$.
+
+\section{Strongly Consistent Interval Estimates}
+\label{sec_conf_int}
+
+We will now use the Gaussian quantile inequalities we have proved to construct strongly consistent interval estimates for an unknown population mean.  Before we do so, however, we will comment on the definition of strong consistency.  In what follows, given an interval $I$ we will write $\ell(I)$, $r(I)$ and $|I|$ to respectively denote its left endpoint, its right endpoint, and its length.  All of the convergence properties we discuss will be in the large sample limit.
+
+In~\cite{rising2023orderPersp}, a sequence of interval estimates $\hat{I}_n$ was said to be \emph{strongly consistent} for a parameter $\theta$ if the sequences $\ell(\hat{I}_n)$ and $r(\hat{I}_n)$ are both consistent point estimates of $\theta$ and $\prob{\theta \in \hat{I}_n}$ converges to $1$.  We will state and prove an equivalent definition in Theorem~\ref{thm_def_equiv}.
+
+\begin{theorem}
+\label{thm_def_equiv}
+A sequence of interval estimates $\hat{I}_n$ is strongly consistent for $\theta$ if and only if $|\hat{I}_n|$ converges to zero in probability and $\prob{\theta \in \hat{I}_n}$ converges to $1$.
+\end{theorem}
+\begin{proof}
+If $\hat{I}_n$ is strongly consistent for $\theta$ then $\ell(\hat{I}_n)$ and $r(\hat{I}_n)$ both converge to $\theta$ in probability so $|\hat{I}_n|$ converges to zero in probability.  Now suppose that $|\hat{I}_n|$ converges to zero in probability and $\prob{\theta \in \hat{I}_n}$ converges to one.  In this case $\ell(\hat{I}_n)$ and $r(\hat{I}_n)$ both converge to some common value in probability.  If that value were not $\theta$, then $\prob{\theta \in \hat{I}_n}$ would converge to zero in the limit, so we must have that $\ell(\hat{I}_n)$ and $r(\hat{I}_n)$ are consistent point estimates of $\theta$.  Therefore $\hat{I}_n$ is strongly consistent for $\theta$.
+\end{proof}
+
+\noindent
+There is no significant difference between the original definition of strong consistency and the equivalent conditions given in Theorem~\ref{thm_def_equiv} and which characterization we use is a matter of taste.  The characterization in terms of the length of the interval seems to me to be more in line with how we have traditionally thought of interval estimates, so we will use this characterization in what follows.
+
+We now turn to the problem of constructing interval estimates for the mean $\mu$ of independent and identically distributed observations $x_1, x_2, \dots$ with finite variance $\sigma^2$.  As is standard, we will denote the sample mean and sample variance of the first $n$ observations as $\hat{\mu}_n$ and $\hat{\sigma}_n^2$ respectively.  We will write $\hat{I}_n(\alpha)$ for the open interval whose endpoints are $\hat{\mu}_n \pm \hat{\sigma}_n / \sqrt{n} \cdot z_{\alpha / 2}$.  The central limit theorem applies here, so $\prob{\mu \in \hat{I}_n(\alpha)}$ converges to $\alpha$.  Furthermore, $\hat{\sigma}_n$ is a consistent estimator of $\sigma$, so $|\hat{I}_n(\alpha)|$ converges to zero in probability.
+
+We will construct a sequence of strongly consistent interval estimates for $\mu$ as $\hat{I}_n(\alpha_n)$ where the sequence $\alpha_n$ is chosen so that $\alpha_n$ converges to zero and $|\hat{I}_n(\alpha_n)|$ converges to zero in probability.  However, there is a technical issue here.  $\alpha_n$ controls the nominal coverage probability, but this may be quite different from the actual coverage probability.  In order to make this work, we will need to know when the actual coverage probability converges to one as $\alpha_n \rightarrow 0$.  Suitable conditions were found in~\cite{hall1995coverage}, and we state their result as Theorem~\ref{thm_hall_jing}.
+
+\begin{theorem}[\cite{hall1995coverage}]
+\label{thm_hall_jing}
+Let $X_1, X_2, \dots$ be a sequence of independent and identically distributed random variables with mean $\mu$ and distribution function $F$.  Fix $d > 0$ and suppose that that there are real numbers $y, c_1, c_2$ with $c_1, c_2 > 0$ such that the following conditions hold:
+\begin{enumerate}
+\item $\mathbb{E}X_1^4 < \infty$;
+\item $\displaystyle \liminf_{h \downarrow 0} h^{-1}\prob{|X_1 - \mu + x - y| \leq h} \geq c_1$ for all $x$ with $|x| \leq c_2$;
+\item $(c_1c_2^3)^{-2}\mathbb{E}|X_1 - \mu - y|^4 + (c_1c_2^3)^{-3}(\mathbb{E}|X_1 - \mu - y|^3)^2 \leq d$.
+\end{enumerate}
+If $\hat{I}_n$ is defined as above, then there is some function $B$ such that $\prob{\mu \notin \hat{I}_n} \leq \alpha + B(d) / n$.
+\end{theorem}
+\noindent
+We will refer to the hypotheses of Theorem~\ref{thm_hall_jing} as the Hall-Jing conditions after its authors.  As is noted in~\cite{hall1995coverage}, any distribution with four finite moments and a density bounded below by some positive constant in an interval containing the origin satisfies these conditions, so they hold for many distributions of interest.  It is not known, however, which if any discrete distributions satisfy the Hall-Jing conditions.
+
+We can now prove our main result, but before we do so we will need one new piece of vocabulary.  We will say that a sequence $\alpha_n$ contained in $(0, 1)$ is \emph{slowly decaying} if $\alpha_n$ converges to zero and $\alpha_n^{1 / n}$ converges to one.
+
+\begin{theorem}
+\label{thm_sci}
+Let $X_1, X_2, \dots$ be a sequence of independent and identically distributed random variables which satisfy the Hall-Jing conditions for some $d > 0$ and let $\alpha_n$ be a slowly decaying sequence.  Then as $n$ increases the coverage probability of $\hat{I}_n(\alpha_n)$ converges to one and $|\hat{I}_n(\alpha_n)|$ converges to zero in probability.
+\end{theorem}
+\begin{proof}
+We observe that $|\hat{I}_n(\alpha_n)| = 2\hat{\sigma}_n / \sqrt{n} \cdot z_{\alpha / 2}$.  $\alpha_n$ converges to zero, so $\alpha_n < 1 / \sqrt{2\pi}$ for all but finitely many $n$.  Therefore $|\hat{I}_n(\alpha_n)| < 2\hat{\sigma}_n \sqrt{ -2\log(\sqrt{\pi}\alpha_n / 2) / n}$ when $n$ is sufficiently large by Theorem~\ref{thm_upper_bound_elem}.  This is the product of a sequence that converges in probability to $2\sigma$ and one that converges surely to zero, so it converges to zero in probability.
+
+The error probability of $\hat{I}_n(\alpha_n)$ is at most $\alpha_n + O(n^{-1})$ by Theorem~\ref{thm_hall_jing}.  Since $\alpha_n$ converges to zero, the coverage probability of $\hat{I}_n(\alpha_n)$ converges to one.
+\end{proof}
+
+There are many slowly decaying sequences, and while any one of them has gives the correct asymptotics, the finite sample behavior of $\hat{I}_n(\alpha_n)$ may be very sensitive to the choice of $\alpha_n$.  Further research will be needed to create an actual interval estimation procedure based on Theorem~\ref{thm_sci}.  On the other hand, we note that the Hall-Jing assumptions are rather weak and it is likely that stronger bounds on the excess error probability can be found with stronger assumptions.  If this is the case, then we might prefer to choose summable slowly decaying sequences in the hopes that we will construct interval estimates whose error probabilities satisfy the hypotheses of the Borel-Cantelli lemma.
+
+\section{Applications to Ranking}
+\label{sec_rank}
+
+We now turn to the problem of estimating the ranks of a collection of unknown parameters.  The connection between interval estimates and rank estimation was studied in~\cite{rising2023orderPersp}, where it was shown that order information from a set of interval estimates may be used to study the ranks of the parameters being estimated.  In particular, it was shown that if we have strongly consistent interval estimates for each parameter, then we can produce an integer-valued ranking estimator which is consistent even if the parameters to be ranked are not necessarily distinct.  No procedure for constructing strongly consistent interval estimates was known at the time, so the result in~\cite{rising2023orderPersp} are conditional on the existence of these estimators.  Here we give an unconditional version of this result based on Theorem~\ref{thm_sci}.
+
+Let $\mu_1, \dots, \mu_p$ be the means of distributions that satisfy the Hall-Jing conditions, and suppose that we have $n$ independent observations from each of these distributions.  Let $\hat{\mu}_{j, n}$ and $\hat{\sigma}^2_{j, n}$ denote the sample mean and sample variance for the observations from the $j$th distribution, let $\alpha_n$ be a slowly decaying sequence, and let $\hat{I}_{j, n}(\alpha_n)$ be the open interval whose endpoints are $\hat{\mu}_{j, n} \pm \hat{\sigma}_{j, n} / \sqrt{n} \cdot z_{\alpha_n / 2}$.  We then define \[S_j = \{k \mid r(\hat{I}_{j, n}(\alpha_n)) \leq \ell(\hat{I}_{j, n}(\alpha_n))\}\] and $r_j$ to be $1 + \sum_{k = 1}^p \ind{|S_k| < |S_j|}$.
+
+\begin{theorem}
+\label{thm_ranks}
+$r_j$ is a consistent estimator of the rank of $\mu_j$.
+\end{theorem}
+\begin{proof}
+This follows from~\cite[Theorems 6.4 and 6.7]{rising2023orderPersp} and Theorem~\ref{thm_sci}.
+\end{proof}
+
+\section*{Acknowledgments}
+
+The data for Figure~\ref{fig_bound} was generated using the \texttt{lamW} package~\citep{adler2015lambertPackage}.
+
+\bibliographystyle{apalike}
+\bibliography{StrConsistInt}
+
+\end{document}
